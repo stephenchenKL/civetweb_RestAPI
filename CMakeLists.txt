@@ -12,4 +12,20 @@ set(CIVETWEB_PATH "${CMAKE_CURRENT_SOURCE_DIR}/../civetweb")
 set (APP_SRC_DIR ${CMAKE_CURRENT_SOURCE_DIR})  
 set(APP_SOURCES ${APP_SOURCES} 
     ${APP_SRC_DIR}/main.cpp
+    ${APP_SRC_DIR}/experimentHandler.cpp
 )
+set(thirdPary_DIR "${CMAKE_CURRENT_SOURCE_DIR}/../3rdParty/")
+
+
+find_package (Threads REQUIRED)
+find_package(OpenSSL REQUIRED) 
+# find_package(nlohmann_json 3.10.2 REQUIRED)
+
+
+include_directories(${thirdPary_DIR})
+
+add_executable (${PROJ_NAME}   ${APP_SOURCES}  )
+
+TARGET_LINK_LIBRARIES(${PROJ_NAME} Threads::Threads)
+TARGET_LINK_LIBRARIES(${PROJ_NAME} libcivetweb.a -ldl)
+# TARGET_LINK_LIBRARIES(${PROJ_NAME} PRIVATE nlohmann_json::nlohmann_json)
