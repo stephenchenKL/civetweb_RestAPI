@@ -6,25 +6,27 @@
 // for convenience
 using json = nlohmann::json;
 
+#include "../cJSON/cJSON.h"
+
 #include "experimentHandler.h"
 
-// static int
-// SendJSON(struct mg_connection *conn, cJSON *json_obj)
-// {
-// 	char *json_str = cJSON_PrintUnformatted(json_obj);
-// 	size_t json_str_len = strlen(json_str);
-// 
-// 	/* Send HTTP message header */
-// 	mg_send_http_ok(conn, "application/json; charset=utf-8", json_str_len);
-// 
-// 	/* Send HTTP message content */
-// 	mg_write(conn, json_str, json_str_len);
-// 
-// 	/* Free string allocated by cJSON_Print* */
-// 	cJSON_free(json_str);
-// 
-// 	return (int)json_str_len;
-// }
+static int
+SendJSON(struct mg_connection *conn, cJSON *json_obj)
+{
+	char *json_str = cJSON_PrintUnformatted(json_obj);
+	size_t json_str_len = strlen(json_str);
+
+	/* Send HTTP message header */
+	mg_send_http_ok(conn, "application/json; charset=utf-8", json_str_len);
+
+	/* Send HTTP message content */
+	mg_write(conn, json_str, json_str_len);
+
+	/* Free string allocated by cJSON_Print* */
+	cJSON_free(json_str);
+
+	return (int)json_str_len;
+}
 
 
 bool ExperimentHandler::handleGet(CivetServer *server, struct mg_connection *conn)
@@ -32,42 +34,26 @@ bool ExperimentHandler::handleGet(CivetServer *server, struct mg_connection *con
 
     json j;
     // add a number that is stored as double (note the implicit conversion of j to an object)
-j["pi"] = 3.141;
+j["exp_status"] = 100;
 
-// add a Boolean that is stored as bool
-j["happy"] = true;
+const auto s = j.dump();
 
-// add a string that is stored as std::string
-j["name"] = "Niels";
+std::cout << s << std::endl;
 
-// add another null object by passing nullptr
-j["nothing"] = nullptr;
-
-// add an object inside the object
-j["answer"]["everything"] = 42;
-
-// add an array that is stored as std::vector (using an initializer list)
-j["list"] = { 1, 0, 2 };
-
-// add another object (using an initializer list of pairs)
-j["object"] = { {"currency", "USD"}, {"value", 42.99} };
-
-// serialize to BSON
-std::vector<std::uint8_t> v_bson = json::to_bson(j);
-
-	/* Send HTTP message header */
-	mg_send_http_ok(conn, "application/json; charset=utf-8", v_bson.size());
+char* c = const_cast<char*>(s.c_str());
+mg_send_http_ok(conn, "application/json; charset=utf-8", s.size());
     
     
-    const auto s = j.dump();
-    
-    std::cout << s << std::endl;
-    
-    char* c = const_cast<char*>(s.c_str());
-    const void * temp = &c;
+
 
 	/* Send HTTP message content */
-	mg_write(conn, temp, s.size());
+    mg_write(conn, c, s.size());
+
+//    cJSON *obj_return = cJSON_CreateObject();
+//    cJSON_AddNumberToObject(obj_return, "exp_status", 100);
+//    char *json_str = cJSON_PrintUnformatted(obj_return);
+//    size_t json_str_len = strlen(json_str);
+//    mg_write(conn, json_str, json_str_len);
 
     return true;
 }

@@ -24,8 +24,16 @@ find_package(OpenSSL REQUIRED)
 
 include_directories(${thirdPary_DIR})
 
+# cJSON
+set(CJSON_PATH "${CMAKE_CURRENT_SOURCE_DIR}/../cJSON")
+set(cJSON_INCLUDE_DIR "${CJSON_PATH}")
+set(cJSON_LINK_DIRECTORIES "${CJSON_PATH}/build_x86/")
+include_directories(${cJSON_INCLUDE_DIR})
+link_directories(${cJSON_LINK_DIRECTORIES})
+
 add_executable (${PROJ_NAME}   ${APP_SOURCES}  )
 
 TARGET_LINK_LIBRARIES(${PROJ_NAME} Threads::Threads)
 TARGET_LINK_LIBRARIES(${PROJ_NAME} libcivetweb.a -ldl)
 # TARGET_LINK_LIBRARIES(${PROJ_NAME} PRIVATE nlohmann_json::nlohmann_json)
+TARGET_LINK_LIBRARIES(${PROJ_NAME} libcJSON.a)
