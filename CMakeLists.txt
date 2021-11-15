@@ -2,6 +2,8 @@ cmake_minimum_required(VERSION 3.16)
 set(PROJ_NAME httpSvcRestApi)
 project(${PROJ_NAME} C CXX)
 
+
+
 # civetweb
 set(CIVETWEB_PATH "${CMAKE_CURRENT_SOURCE_DIR}/../civetweb")
 
@@ -12,7 +14,7 @@ set(CIVETWEB_PATH "${CMAKE_CURRENT_SOURCE_DIR}/../civetweb")
 set (APP_SRC_DIR ${CMAKE_CURRENT_SOURCE_DIR})  
 set(APP_SOURCES ${APP_SOURCES} 
     ${APP_SRC_DIR}/main.cpp
-    ${APP_SRC_DIR}/experimentHandler.cpp
+    ${APP_SRC_DIR}/webHandler.cpp
 )
 set(thirdPary_DIR "${CMAKE_CURRENT_SOURCE_DIR}/../3rdParty/")
 
@@ -32,6 +34,13 @@ include_directories(${cJSON_INCLUDE_DIR})
 link_directories(${cJSON_LINK_DIRECTORIES})
 
 add_executable (${PROJ_NAME}   ${APP_SOURCES}  )
+
+set_target_properties(${PROJ_NAME}
+    PROPERTIES
+        CXX_STANDARD 17
+        CXX_STANDARD_REQUIRED YES
+        CXX_EXTENSIONS NO
+)
 
 TARGET_LINK_LIBRARIES(${PROJ_NAME} Threads::Threads)
 TARGET_LINK_LIBRARIES(${PROJ_NAME} libcivetweb.a -ldl)

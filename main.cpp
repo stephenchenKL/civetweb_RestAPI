@@ -5,7 +5,7 @@
 #include <iostream>
 #include <CivetServer.h>
 
-#include "experimentHandler.h"
+#include "webHandler.h"
 
 #define NO_SSL
 
@@ -52,9 +52,6 @@
 	server.addHandler(EXPERIMENT_URI, h_experiment);
     
 
-
-
-    
      while (true) {
  		sleep(1);
  	}
