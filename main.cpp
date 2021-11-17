@@ -4,9 +4,11 @@
 #include <unistd.h>
 #include <iostream>
 #include <CivetServer.h>
+#include <condition_variable>
+#include <thread>
 
 #include "webHandler.h"
-//#include "threadsafe_queue.h"
+#include "threadsafe_queue.h"
 
 #define NO_SSL
 
@@ -26,80 +28,48 @@
 #define METHOD_FILES_DIR "/tmp/"
 
 
+threadsafe_queue<std::string> message_q;
+threadsafe_queue<std::string> message_q2;
+std::condition_variable cond_cmd;
+std::mutex mtx;
 
 
-#include <queue>
-#include <memory>
-#include <mutex>
-#include <condition_variable>
-template<typename T>
-class threadsafe_queue
+void hw_thread()
 {
-private:
-mutable std::mutex mut;
-std::queue<T> data_queue;
-std::condition_variable data_cond;
-public:
-threadsafe_queue()
-{}
-threadsafe_queue(threadsafe_queue const& other)
-{
-std::lock_guard<std::mutex> lk(other.mut);
-data_queue=other.data_queue;
+    // Wait until webHandler sends cmd
+    std::unique_lock<std::mutex> lk(mtx);
+    cond_cmd.wait(lk, []{return message_q.empty();});
+ 
+    // after the wait, we own the lock.
+    std::cout << "Worker thread is processing cmd: ";
+    std::string cmd;
+    message_q.wait_and_pop(cmd);
+ 
+    std::cout << "cmd\n";
+ 
+    // Manual unlocking is done before notifying, to avoid waking up
+    // the waiting thread only to block again (see notify_one for details)
+    lk.unlock();
 }
-void push(T new_value)
+
+void hw_thread2()
 {
-std::lock_guard<std::mutex> lk(mut);
-data_queue.push(new_value);
-data_cond.notify_one();
+    
+    std::cout << "Worker thread is waiting cmd ... ";
+    std::string cmd;
+    message_q.wait_and_pop(cmd);
+ 
+    std::cout << "cmd\n";
+ 
+
 }
-void wait_and_pop(T& value)
-{
-std::unique_lock<std::mutex> lk(mut);
-data_cond.wait(lk,[this]{return !data_queue.empty();});
-value=data_queue.front();
-data_queue.pop();
-}
-std::shared_ptr<T> wait_and_pop()
-{
-std::unique_lock<std::mutex> lk(mut);
-data_cond.wait(lk,[this]{return !data_queue.empty();});
-std::shared_ptr<T> res(std::make_shared<T>(data_queue.front()));
-data_queue.pop();
-return res;
-}
-bool try_pop(T& value)
-{
-std::lock_guard<std::mutex> lk(mut);
-if(data_queue.empty())
-return false;
-value=data_queue.front();
-data_queue.pop();
-return true;
-}
-std::shared_ptr<T> try_pop()
-{
-std::lock_guard<std::mutex> lk(mut);
-if(data_queue.empty())
-return std::shared_ptr<T>();
-std::shared_ptr<T> res(std::make_shared<T>(data_queue.front()));
-data_queue.pop();
-return res;
-}
-bool empty() const
-{
-std::lock_guard<std::mutex> lk(mut);
-return data_queue.empty();
-}
-};
 
 
 
  int main()
  {
-     
-threadsafe_queue<int> message_q;
-     
+    //std::thread worker(hw_thread);
+    std::thread worker2(hw_thread2);
      
     int err = 0;
      
