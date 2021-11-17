@@ -9,6 +9,7 @@
 
 #include "webHandler.h"
 #include "threadsafe_queue.h"
+#include "command.h"
 
 #define NO_SSL
 
@@ -28,7 +29,7 @@
 #define METHOD_FILES_DIR "/tmp/"
 
 
-threadsafe_queue<std::string> message_q;
+threadsafe_queue<Command> message_q;
 std::condition_variable cond_cmd;
 std::mutex mtx;
 
@@ -37,16 +38,19 @@ std::mutex mtx;
 
 void hw_thread()
 {
-    
     std::cout << "Worker thread is waiting cmd ... ";
-    
-    std::string cmd;
+    Command cmd;
     while(true){
         message_q.wait_and_pop(cmd);
-        std::cout << "cmd :" << cmd << std::endl;
+        std::cout << "cmd.cmd :" << cmd.cmd << std::endl;
+        std::cout << "cmd.para1 :" << cmd.para1 << std::endl;
+        std::cout << "cmd.para2 :" << cmd.para2 << std::endl;
+        std::cout << "cmd.para3 :" << cmd.para3 << std::endl;
+        std::cout << "cmd.para4 :" << cmd.para4 << std::endl;
+        std::cout << "cmd.para5 :" << cmd.para5 << std::endl;
+        std::cout << "cmd.para6 :" << cmd.para6 << std::endl;
+        
     }
-
-
 }
 
 

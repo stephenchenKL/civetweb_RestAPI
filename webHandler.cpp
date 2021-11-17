@@ -9,10 +9,11 @@ using json = nlohmann::json;
 #include "../cJSON/cJSON.h"
 
 #include "webHandler.h"
+#include "command.h"
 
 
 
-extern threadsafe_queue<std::string> message_q;
+extern threadsafe_queue<Command> message_q;
 extern std::condition_variable cond_cmd;
 extern std::mutex mtx;
 
@@ -83,7 +84,7 @@ bool ExperimentHandler::handlePost(CivetServer *server, struct mg_connection *co
 
 bool ExperimentHandler::handlePut(CivetServer *server, struct mg_connection *conn)
 {
-    
+    Command cmd;
     // Handler may access the request info using mg_get_request_info 
     int status = 503;
     
@@ -117,17 +118,70 @@ bool ExperimentHandler::handlePut(CivetServer *server, struct mg_connection *con
                     
                     std::string str_eject ("eject");
                     std::string str_pickSensor ("pickSensor");
-                    std::string str_shaker ("shaker_");
+                    std::string str_shaker ("shaker");
                     std::string str_setSampleTemp ("setSampleTemp");
                     
                     var1 = (std::string) pp;
                     std::cout << "var1: " << var1 << std::endl;
                     
                     if (0 == str_eject.compare(var1)){
-                        
-                        message_q.push(var1);
-                        message_q.push("additional push");
+                        cmd.cmd = var1;
+                        message_q.push(cmd);
 
+                    }
+                    else if (0 == var1.find(str_pickSensor)){ 
+                        std::string delimiter = "_";
+                        std::string row;
+                        std::string col;
+                            
+                        size_t pos = 0;
+                        if( (pos = var1.find(delimiter)) != std::string::npos) 
+                        {
+                            var1.erase(0, pos + delimiter.length());
+                        }
+                        if( (pos = var1.find(delimiter)) != std::string::npos) 
+                        {
+                            row = var1.substr(0, pos);
+                            var1.erase(0, pos + delimiter.length());
+                            col = var1;
+                        }
+                        std::cout << "pick sensor " + row + " " + col << std::endl;
+                        //cmd = pickSensor;
+                        cmd.cmd = str_pickSensor;
+                        cmd.para1 = row[0]-'A';
+                        cmd.para2 = std::stoi(col);
+                        message_q.push(cmd);
+                        cond_cmd.notify_all();
+                        status = 200;
+                    }
+                    else if (0 == var1.find(str_shaker)){ 
+                        std::string delimiter = "_";
+                        int shakerId = 0;
+                        int shakerMode = 0;
+                        int shakeRpm = 0;
+                            
+                        size_t pos = 0;
+                        if( (pos = var1.find(delimiter)) != std::string::npos) 
+                        {
+                            var1.erase(0, pos + delimiter.length());
+                        }
+                        if( (pos = var1.find(delimiter)) != std::string::npos) 
+                        {
+                            shakerId = std::stoi(var1.substr(0, pos));
+                            var1.erase(0, pos + delimiter.length());
+                            shakerMode = std::stoi(var1.substr(0, pos));
+                            var1.erase(0, pos + delimiter.length());
+                            shakeRpm = std::stoi(var1);
+                        }
+                        std::cout << "shape mode: id = " << shakerId << ", mode = " << shakerMode << ", rpm = " << shakeRpm << std::endl;
+                        cmd.cmd = str_shaker;
+                        cmd.para1 = shakerId;
+                        cmd.para2 = shakerMode;
+                        cmd.para3 = shakeRpm;
+                        message_q.push(cmd);
+                            
+                        cond_cmd.notify_all();
+                        status = 200;
                     }
                 }
                 else{ // unrecognized parameter
