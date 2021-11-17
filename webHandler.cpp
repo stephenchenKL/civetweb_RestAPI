@@ -13,7 +13,6 @@ using json = nlohmann::json;
 
 
 extern threadsafe_queue<std::string> message_q;
-extern threadsafe_queue<std::string> message_q2;
 extern std::condition_variable cond_cmd;
 extern std::mutex mtx;
 
@@ -126,12 +125,9 @@ bool ExperimentHandler::handlePut(CivetServer *server, struct mg_connection *con
                     
                     if (0 == str_eject.compare(var1)){
                         
-                        message_q2.push(var1);
-                            
-                        std::lock_guard<std::mutex> lk(mtx);
                         message_q.push(var1);
-                        cond_cmd.notify_all();   
-                        std::cout << "message_q.push(var1); " << std::endl;
+                        message_q.push("additional push");
+
                     }
                 }
                 else{ // unrecognized parameter

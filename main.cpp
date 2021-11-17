@@ -29,38 +29,23 @@
 
 
 threadsafe_queue<std::string> message_q;
-threadsafe_queue<std::string> message_q2;
 std::condition_variable cond_cmd;
 std::mutex mtx;
 
 
-void hw_thread()
-{
-    // Wait until webHandler sends cmd
-    std::unique_lock<std::mutex> lk(mtx);
-    cond_cmd.wait(lk, []{return message_q.empty();});
- 
-    // after the wait, we own the lock.
-    std::cout << "Worker thread is processing cmd: ";
-    std::string cmd;
-    message_q.wait_and_pop(cmd);
- 
-    std::cout << "cmd\n";
- 
-    // Manual unlocking is done before notifying, to avoid waking up
-    // the waiting thread only to block again (see notify_one for details)
-    lk.unlock();
-}
 
-void hw_thread2()
+
+void hw_thread()
 {
     
     std::cout << "Worker thread is waiting cmd ... ";
+    
     std::string cmd;
-    message_q.wait_and_pop(cmd);
- 
-    std::cout << "cmd\n";
- 
+    while(true){
+        message_q.wait_and_pop(cmd);
+        std::cout << "cmd :" << cmd << std::endl;
+    }
+
 
 }
 
@@ -68,8 +53,7 @@ void hw_thread2()
 
  int main()
  {
-    //std::thread worker(hw_thread);
-    std::thread worker2(hw_thread2);
+    std::thread worker(hw_thread);
      
     int err = 0;
      
