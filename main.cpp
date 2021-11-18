@@ -10,6 +10,7 @@
 #include "webHandler.h"
 #include "threadsafe_queue.h"
 #include "command.h"
+#include "hardware.h"
 
 #define NO_SSL
 
@@ -36,28 +37,16 @@ std::mutex mtx;
 
 
 
-void hw_thread()
-{
-    std::cout << "Worker thread is waiting cmd ... ";
-    Command cmd;
-    while(true){
-        message_q.wait_and_pop(cmd);
-        std::cout << "cmd.cmd :" << cmd.cmd << std::endl;
-        std::cout << "cmd.para1 :" << cmd.para1 << std::endl;
-        std::cout << "cmd.para2 :" << cmd.para2 << std::endl;
-        std::cout << "cmd.para3 :" << cmd.para3 << std::endl;
-        std::cout << "cmd.para4 :" << cmd.para4 << std::endl;
-        std::cout << "cmd.para5 :" << cmd.para5 << std::endl;
-        std::cout << "cmd.para6 :" << cmd.para6 << std::endl;
-        
-    }
-}
 
 
 
  int main()
  {
-    std::thread worker(hw_thread);
+    //std::thread worker(hw_thread);
+     Hardware hw_control(&message_q);
+     std::thread hw_thread (&Hardware::control, hw_control);
+     
+
      
     int err = 0;
      

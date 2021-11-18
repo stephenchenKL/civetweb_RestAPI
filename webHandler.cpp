@@ -14,8 +14,25 @@ using json = nlohmann::json;
 
 
 extern threadsafe_queue<Command> message_q;
-extern std::condition_variable cond_cmd;
-extern std::mutex mtx;
+
+std::string str_scan ("scan");
+std::string str_stop ("stop");
+std::string str_snap ("snap");
+std::string str_saveRef ("saveRef");
+std::string str_saveDark ("saveDark");
+std::string str_autoGain ("autoGain");
+std::string str_lampOn ("lampOn");
+std::string str_lampOff ("lampOff");
+std::string str_park ("park");
+std::string str_homeXYZ ("homeXYZ");
+std::string str_eject ("eject");
+std::string str_pickSensor ("pickSensor");
+std::string str_sample ("sample");
+std::string str_shakerOn ("shakerOn");
+std::string str_shakerOff ("shakerOff");
+std::string str_shaker ("shaker_");
+std::string str_setSampleTemp ("setSampleTemp");
+std::string str_setSpectTemp ("setSpectTemp");
 
 
 static int
@@ -55,26 +72,14 @@ bool ExperimentHandler::handleGet(CivetServer *server, struct mg_connection *con
 	/* Send HTTP message content */
     mg_write(conn, c, s.size());
 
-//    cJSON *obj_return = cJSON_CreateObject();
-//    cJSON_AddNumberToObject(obj_return, "exp_status", 100);
-//    char *json_str = cJSON_PrintUnformatted(obj_return);
-//    size_t json_str_len = strlen(json_str);
-//    mg_write(conn, json_str, json_str_len);
+
 
     return true;
 }
 	
 bool ExperimentHandler::handlePost(CivetServer *server, struct mg_connection *conn)
 {
-// 		cJSON *obj_return = cJSON_CreateObject();
-//         if (!obj_return) {
-//             /* insufficient memory? */
-//             mg_send_http_error(conn, 500, "Server error");
-//             return 500;
-//         }
-//         cJSON_AddStringToObject(obj_return, "info", "api/exp POST Not supported");
-//         SendJSON(conn, obj_return);
-//         cJSON_Delete(obj_return);
+
 
     return false;
 }
@@ -116,10 +121,7 @@ bool ExperimentHandler::handlePut(CivetServer *server, struct mg_connection *con
                 if (0 == str_cmd.compare(var1)){
                     pp = strtok(NULL, delim2);
                     
-                    std::string str_eject ("eject");
-                    std::string str_pickSensor ("pickSensor");
-                    std::string str_shaker ("shaker");
-                    std::string str_setSampleTemp ("setSampleTemp");
+
                     
                     var1 = (std::string) pp;
                     std::cout << "var1: " << var1 << std::endl;
@@ -151,7 +153,6 @@ bool ExperimentHandler::handlePut(CivetServer *server, struct mg_connection *con
                         cmd.para1 = row[0]-'A';
                         cmd.para2 = std::stoi(col);
                         message_q.push(cmd);
-                        cond_cmd.notify_all();
                         status = 200;
                     }
                     else if (0 == var1.find(str_shaker)){ 
@@ -180,7 +181,6 @@ bool ExperimentHandler::handlePut(CivetServer *server, struct mg_connection *con
                         cmd.para3 = shakeRpm;
                         message_q.push(cmd);
                             
-                        cond_cmd.notify_all();
                         status = 200;
                     }
                 }
@@ -237,98 +237,7 @@ j["object"] = { {"currency", "USD"}, {"value", 42.99} };
     return status;
 
 
-        
-//  cJSON *obj_return = cJSON_CreateObject();
-//         
-//     const struct mg_request_info *req_info = mg_get_request_info(conn);
-//     long long tlen = req_info->content_length;
-//     std::cout << "req_info->query_string: " << req_info->query_string << std::endl;
-//     std::string s(req_info->query_string);
-//     std::string delimiter = "=";
-//     size_t pos = 0;
-//     std::string token;
-//     while ((pos = s.find(delimiter)) != std::string::npos) {
-//         token = s.substr(0, pos);
-//         std::cout << token << std::endl;
-//         s.erase(0, pos + delimiter.length());
-//     }
-//     std::cout << s << std::endl;
-// 
-//     
-//         char delim[] = "&";
-//         char query_string[2048];
-//         strcpy(query_string, req_info->query_string);
-//         char *ptr = strtok(query_string, delim);
-//         char *pvs[MAX_PARAMETERS] = { 0 };
-//         int i = 0;
-//         while (ptr != NULL){
-//             pvs[i++] = ptr;
-//             ptr = strtok(NULL, delim);
-//         }
-// 
-//         for (i = 0; i < MAX_PARAMETERS; ++i) {
-//             if (pvs[i] != NULL) {
-//                 char delim2[] = "=";
-//                 char *pp = strtok(pvs[i], delim2);
-//                 if (pp != NULL) {
-//                     
-//                     std::string str_cmd ("command");
-//                     std::string var1 = (std::string) pp;
-//                     
-//                     if (0 == str_cmd.compare(var1)){
-//                         pp = strtok(NULL, delim2);
-//                         
-//                         std::string str_scan ("scan");
-//                         std::string str_stop ("stop");
-//                         std::string str_snap ("snap");
-//                         var1 = (std::string) pp;
-//                         
-//                         if (0 == str_scan.compare(var1)){
-//                             mqtt.publish("command", var1);
-//                             exp_status = 1;
-//                             cJSON_AddStringToObject(obj_return, "ack", "received scan command");
-//                             cJSON_AddNumberToObject(obj_return, "exp_status", exp_status);
-//                             status = 200;
-//                         }
-//                         else if (0 == str_stop.compare(var1)){
-//                             mqtt.publish("command", var1);
-//                             exp_status = 0;
-//                             cJSON_AddStringToObject(obj_return, "ack", "received stop command");
-//                             cJSON_AddNumberToObject(obj_return, "exp_status", exp_status);
-//                             status = 200;
-//                         }
-//                         else if (0 == str_snap.compare(var1)){
-//                             mqtt.publish("command", var1);
-//                             cJSON_AddStringToObject(obj_return, "ack", "received snap command");
-//                             cJSON_AddNumberToObject(obj_return, "exp_status", exp_status);
-//                             status = 200;
-//                         }
-//                         else{
-//                             mqtt.publish("command", var1);
-//                             cJSON_AddStringToObject(obj_return, "ack", "received unrecognized Experiment command");
-//                             cJSON_AddNumberToObject(obj_return, "exp_status", exp_status);
-//                             pp = strtok(NULL, delim2);
-//                             status =  400;
-//                             break;
-//                         }
-//                         std::cout << "exp_status = " << exp_status << '\n';
-//                     }
-//                     else{ // unrecognized parameter
-//                         cJSON_AddStringToObject(obj_return, "ack", "received unrecognized parameter");
-//                         cJSON_AddNumberToObject(obj_return, "exp_status", exp_status);
-//                         pp = strtok(NULL, delim2);
-//                         status =  400;
-//                         break;
-//                     }
-//                 }
-//             }
-//             else{ // no more parameters
-//                 break;
-//             }
-//         }
-// 	
-//         SendJSON(conn, obj_return);
-//         cJSON_Delete(obj_return);
+    
 
     return status;
         
