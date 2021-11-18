@@ -30,3 +30,9 @@ void  Hardware::control()
     }
 }
 
+void Hardware::run()
+{
+    hw_thread = std::thread(&Hardware::control, this);
+    
+}
+

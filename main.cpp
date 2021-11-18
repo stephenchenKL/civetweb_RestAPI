@@ -42,9 +42,8 @@ std::mutex mtx;
 
  int main()
  {
-    //std::thread worker(hw_thread);
-     Hardware hw_control(&message_q);
-     std::thread hw_thread (&Hardware::control, hw_control);
+    Hardware hw_control(&message_q);
+    hw_control.run();
      
 
      
