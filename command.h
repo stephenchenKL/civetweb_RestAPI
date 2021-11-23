@@ -1,6 +1,7 @@
 #pragma once
 
 
+#include <string>
 
 enum Axis {
     AXIS_ALL = 0,
@@ -45,3 +46,84 @@ struct Command {
     int para5;
     int para6;
 };
+
+enum CmdType{ 
+    Scan,
+    Stop,
+    Snap,
+    SaveRef,
+    SaveDark,
+    AutoGain,
+    LampOn,
+    LampOff,
+    Park,
+    HomeXYZ,
+    Eject,
+    PickSensor,
+    Sample,
+    Shaker,
+    SetSampleTemp,
+    SetSpectTemp,
+    RobotCmd,
+    Unknown
+};
+static const CmdType AllCmdTypes[] = 
+{ 
+    Scan,
+    Stop,
+    Snap,
+    SaveRef,
+    SaveDark,
+    AutoGain,
+    LampOn,
+    LampOff,
+    Park,
+    HomeXYZ,
+    Eject,
+    PickSensor,
+    Sample,
+    Shaker,
+    SetSampleTemp,
+    SetSpectTemp,
+    RobotCmd,
+    Unknown 
+    
+};
+
+
+//==============================================================================================
+// FUNCTION: cmdTypeToStr
+// PURPOSE:  Maps a command enum value to a string.
+//
+inline std::string cmdTypeToStr( CmdType cmdType )
+{
+    switch (cmdType)
+    {
+        case Scan:              return "scan";
+        case Stop:              return "stop";
+        case Snap:              return "snap";
+        case SaveRef:           return "saveRef";
+        case SaveDark:          return "saveDark";
+        case AutoGain:          return "autoGain";
+        case LampOn:            return "lampOn";
+        case LampOff:           return "lampOff";
+        case Park:              return "park";
+        case HomeXYZ:           return "homeXYZ";
+        case Eject:             return "eject";
+        case PickSensor:        return "pickSensor";
+        case Sample:            return "sample";
+        case Shaker:            return "shaker";
+        case SetSampleTemp:     return "setSampleTemp";
+        case SetSpectTemp:      return "setSpectTemp";
+        case RobotCmd:          return "robotCmd";
+        case Unknown:           return "unknown";
+        
+        default:                return "unknown";
+        
+    }
+}
+
+//std::map<std::string, CmdType> nodeMap;
+
+
+            

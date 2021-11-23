@@ -15,7 +15,7 @@ set (APP_SRC_DIR ${CMAKE_CURRENT_SOURCE_DIR})
 set(APP_SOURCES ${APP_SOURCES} 
     ${APP_SRC_DIR}/main.cpp
     ${APP_SRC_DIR}/webHandler.cpp
-    ${APP_SRC_DIR}/hardware.cpp
+    ${APP_SRC_DIR}/instrumentCtrl.cpp
 )
 set(thirdPary_DIR "${CMAKE_CURRENT_SOURCE_DIR}/../3rdParty/")
 

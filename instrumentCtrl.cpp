@@ -1,19 +1,19 @@
 #include <thread>
 #include <iostream>
-#include "hardware.h"
+#include "instrumentCtrl.h"
 
 
 
-Hardware::Hardware(threadsafe_queue<Command>* p)
+InstrumentCtrl::InstrumentCtrl(threadsafe_queue<Command>* p)
 {
     p_mq = p;
 }
 
-Hardware::~Hardware()
+InstrumentCtrl::~InstrumentCtrl()
 {
 }
 
-void  Hardware::control()
+void  InstrumentCtrl::control()
 {
     std::cout << "Ctrl thread is waiting for cmd ... ";
     Command cmd;
@@ -30,9 +30,9 @@ void  Hardware::control()
     }
 }
 
-void Hardware::run()
+void InstrumentCtrl::run()
 {
-    hw_thread = std::thread(&Hardware::control, this);
+    hw_thread = std::thread(&InstrumentCtrl::control, this);
     
 }
 

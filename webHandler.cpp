@@ -35,6 +35,8 @@ std::string str_setSampleTemp ("setSampleTemp");
 std::string str_setSpectTemp ("setSpectTemp");
 
 
+
+
 static int
 SendJSON(struct mg_connection *conn, cJSON *json_obj)
 {
@@ -125,6 +127,14 @@ bool ExperimentHandler::handlePut(CivetServer *server, struct mg_connection *con
                     
                     var1 = (std::string) pp;
                     std::cout << "var1: " << var1 << std::endl;
+                    
+                    for ( const auto t : AllCmdTypes )
+                    {
+                        if (0 == var1.find(cmdTypeToStr(t)))
+                            std::cout << t;
+                        
+                    }
+                    
                     
                     if (0 == str_eject.compare(var1)){
                         cmd.cmd = var1;

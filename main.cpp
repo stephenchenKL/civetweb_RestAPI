@@ -10,7 +10,7 @@
 #include "webHandler.h"
 #include "threadsafe_queue.h"
 #include "command.h"
-#include "hardware.h"
+#include "instrumentCtrl.h"
 
 #define NO_SSL
 
@@ -42,8 +42,8 @@ std::mutex mtx;
 
  int main()
  {
-    Hardware hw_control(&message_q);
-    hw_control.run();
+    InstrumentCtrl instrumentCtrl(&message_q);
+    instrumentCtrl.run();
      
 
      
