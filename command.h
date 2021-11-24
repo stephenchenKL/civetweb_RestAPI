@@ -47,6 +47,15 @@ struct Command {
     int para6;
 };
 
+struct ENGN_Info
+{
+   bool bCanAutoGain;                     // Spectrometer has adjustable integration time
+   bool bHasVariableSpeed;                // Has more than one speed setting
+   bool bHasDark;                         // Dark spectra has been saved
+   bool bHasRef;                          // Reference spectra has been saved
+   bool bMapOK;                           // Spectrometers map status
+};
+
 enum CmdType{ 
     Scan,
     Stop,

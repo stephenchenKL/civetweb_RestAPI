@@ -6,6 +6,7 @@
 #include <CivetServer.h>
 #include <condition_variable>
 #include <thread>
+#include <future>
 
 #include "webHandler.h"
 #include "threadsafe_queue.h"
@@ -30,7 +31,8 @@
 #define METHOD_FILES_DIR "/tmp/"
 
 
-threadsafe_queue<Command> message_q;
+threadsafe_queue<Command> cmd_q;
+threadsafe_queue<ENGN_Info> info_q;
 std::condition_variable cond_cmd;
 std::mutex mtx;
 
@@ -42,8 +44,9 @@ std::mutex mtx;
 
  int main()
  {
-    InstrumentCtrl instrumentCtrl(&message_q);
+    InstrumentCtrl instrumentCtrl(&cmd_q);
     instrumentCtrl.run();
+    
      
 
      

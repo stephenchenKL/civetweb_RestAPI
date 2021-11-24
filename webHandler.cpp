@@ -2,6 +2,7 @@
 #include <string>
 #include <iostream>
 #include <condition_variable>
+#include <future>
 #include <nlohmann/json.hpp>
 // for convenience
 using json = nlohmann::json;
@@ -13,7 +14,9 @@ using json = nlohmann::json;
 
 
 
-extern threadsafe_queue<Command> message_q;
+extern threadsafe_queue<Command> cmd_q;
+extern threadsafe_queue<ENGN_Info> info_q;
+
 
 std::string str_scan ("scan");
 std::string str_stop ("stop");
@@ -60,22 +63,84 @@ SendJSON(struct mg_connection *conn, cJSON *json_obj)
 bool ExperimentHandler::handleGet(CivetServer *server, struct mg_connection *conn)
 {
 
+    const struct mg_request_info *req_info = mg_get_request_info(conn);
+    long long tlen = req_info->content_length;
+    
+
+    char delim[] = "&";
+    char query_string[2048];
+    
+    if (req_info->query_string != NULL )
+    {
+        strcpy(query_string, req_info->query_string);
+        std::cout << "query_string" << query_string << std::endl;
+    }
+    
+    char *ptr = strtok(query_string, delim);
+    char *pvs[MAX_PARAMETERS] = { 0 };
+    int i = 0;
+    while (ptr != NULL){
+        pvs[i++] = ptr;
+        ptr = strtok(NULL, delim);
+    }
+    for (i = 0; i < MAX_PARAMETERS; ++i) {
+        if (pvs[i] != NULL) {
+            char delim2[] = "=";
+            char *pp = strtok(pvs[i], delim2);
+            if (pp != NULL) {
+                
+                std::string str_info ("info");
+                std::string var1 = (std::string) pp;
+                std::cout << "var1 :" << var1 << std::endl;
+                if (0 == str_info.compare(var1)){
+                    std::cout << "var1 == info." << std::endl;
+                    pp = strtok(NULL, delim2);
+                    Command cmd;
+                    cmd.cmd = var1;
+                    cmd_q.push(cmd);
+                    ENGN_Info info;
+                    info_q.wait_and_pop(info);
+                    std::cout << info.bCanAutoGain << info.bHasDark << info.bHasRef << info.bHasVariableSpeed << info.bMapOK << std::endl;
+                }
+            }
+        }
+    }
+                        
+        
+    
+
     json j;
     // add a number that is stored as double (note the implicit conversion of j to an object)
-    j["exp_status"] = 100;
+j["pi"] = 3.141;
 
-    const auto s = j.dump();
+// add a Boolean that is stored as bool
+j["happy"] = true;
 
-    std::cout << s << std::endl;
+// add a string that is stored as std::string
+j["name"] = "Niels";
 
-    char* c = const_cast<char*>(s.c_str());
-    mg_send_http_ok(conn, "application/json; charset=utf-8", s.size());
+// add another null object by passing nullptr
+j["nothing"] = nullptr;
 
-	/* Send HTTP message content */
-    mg_write(conn, c, s.size());
+// add an object inside the object
+j["answer"]["everything"] = 42;
 
+// add an array that is stored as std::vector (using an initializer list)
+j["list"] = { 1, 0, 2 };
 
+// add another object (using an initializer list of pairs)
+j["object"] = { {"currency", "USD"}, {"value", 42.99} };
 
+	// Send HTTP message header //
+	mg_send_http_ok(conn, "application/json; charset=utf-8", j.size());
+    
+    const void * temp = &j;
+    std::cout << "j.size() = " << j.size() << std::endl;
+
+	// Send HTTP message content //
+	mg_write(conn, temp, j.size());
+    
+     
     return true;
 }
 	
@@ -138,7 +203,7 @@ bool ExperimentHandler::handlePut(CivetServer *server, struct mg_connection *con
                     
                     if (0 == str_eject.compare(var1)){
                         cmd.cmd = var1;
-                        message_q.push(cmd);
+                        cmd_q.push(cmd);
 
                     }
                     else if (0 == var1.find(str_pickSensor)){ 
@@ -162,7 +227,7 @@ bool ExperimentHandler::handlePut(CivetServer *server, struct mg_connection *con
                         cmd.cmd = str_pickSensor;
                         cmd.para1 = row[0]-'A';
                         cmd.para2 = std::stoi(col);
-                        message_q.push(cmd);
+                        cmd_q.push(cmd);
                         status = 200;
                     }
                     else if (0 == var1.find(str_shaker)){ 
@@ -189,7 +254,7 @@ bool ExperimentHandler::handlePut(CivetServer *server, struct mg_connection *con
                         cmd.para1 = shakerId;
                         cmd.para2 = shakerMode;
                         cmd.para3 = shakeRpm;
-                        message_q.push(cmd);
+                        cmd_q.push(cmd);
                             
                         status = 200;
                     }

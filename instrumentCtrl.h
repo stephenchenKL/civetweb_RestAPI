@@ -1,7 +1,9 @@
 #pragma once
 #include <thread>
+#include <future>
 #include "command.h"
 #include "threadsafe_queue.h"
+
 
 class InstrumentCtrl
 {
