@@ -15,7 +15,7 @@ using json = nlohmann::json;
 
 
 extern threadsafe_queue<Command> cmd_q;
-extern threadsafe_queue<ENGN_Info> info_q;
+extern threadsafe_queue<ENGN_Info> rslt_q;
 
 
 std::string str_scan ("scan");
@@ -73,7 +73,7 @@ bool ExperimentHandler::handleGet(CivetServer *server, struct mg_connection *con
     if (req_info->query_string != NULL )
     {
         strcpy(query_string, req_info->query_string);
-        std::cout << "query_string" << query_string << std::endl;
+        std::cout << "query_string: " << query_string << std::endl;
     }
     
     char *ptr = strtok(query_string, delim);
@@ -99,7 +99,7 @@ bool ExperimentHandler::handleGet(CivetServer *server, struct mg_connection *con
                     cmd.cmd = var1;
                     cmd_q.push(cmd);
                     ENGN_Info info;
-                    info_q.wait_and_pop(info);
+                    rslt_q.wait_and_pop(info);
                     std::cout << info.bCanAutoGain << info.bHasDark << info.bHasRef << info.bHasVariableSpeed << info.bMapOK << std::endl;
                 }
             }

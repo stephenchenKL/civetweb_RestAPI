@@ -32,9 +32,12 @@
 
 
 threadsafe_queue<Command> cmd_q;
-threadsafe_queue<ENGN_Info> info_q;
+threadsafe_queue<ENGN_Info> rslt_q;
 std::condition_variable cond_cmd;
 std::mutex mtx;
+
+std::promise<ENGN_Info>info_promise;
+std::shared_future<ENGN_Info> info_future(info_promise.get_future());
 
 
 
@@ -46,6 +49,12 @@ std::mutex mtx;
  {
     InstrumentCtrl instrumentCtrl(&cmd_q);
     instrumentCtrl.run();
+    
+    std::thread t_info(&InstrumentCtrl::getInfo, &instrumentCtrl, ref(info_promise) );
+    std::cout << info_future.get().bCanAutoGain << std::endl;
+    std::cout << info_future.get().bCanAutoGain << std::endl;
+    std::cout << info_future.get().bCanAutoGain << std::endl;
+    std::cout << info_future.get().bCanAutoGain << std::endl;
     
      
 

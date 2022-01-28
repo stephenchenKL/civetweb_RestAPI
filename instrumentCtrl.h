@@ -15,4 +15,5 @@ public:
     ~InstrumentCtrl();
     void control();
     void run();
+    void getInfo(std::promise<ENGN_Info> & prom);
 };
