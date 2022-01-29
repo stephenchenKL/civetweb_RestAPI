@@ -10,12 +10,11 @@ using json = nlohmann::json;
 #include "../cJSON/cJSON.h"
 
 #include "webHandler.h"
-#include "command.h"
 
 
 
-extern threadsafe_queue<Command> cmd_q;
-extern threadsafe_queue<ENGN_Info> rslt_q;
+// extern threadsafe_queue<Command> cmd_q;
+// extern threadsafe_queue<ENGN_Info> rslt_q;
 
 
 std::string str_scan ("scan");
@@ -97,9 +96,11 @@ bool ExperimentHandler::handleGet(CivetServer *server, struct mg_connection *con
                     pp = strtok(NULL, delim2);
                     Command cmd;
                     cmd.cmd = var1;
-                    cmd_q.push(cmd);
+                    //cmd_q.push(cmd);
+                    pCq->push(cmd);
                     ENGN_Info info;
-                    rslt_q.wait_and_pop(info);
+                    //rslt_q.wait_and_pop(info);
+                    pRq->wait_and_pop(info);
                     std::cout << info.bCanAutoGain << info.bHasDark << info.bHasRef << info.bHasVariableSpeed << info.bMapOK << std::endl;
                 }
             }
@@ -203,7 +204,8 @@ bool ExperimentHandler::handlePut(CivetServer *server, struct mg_connection *con
                     
                     if (0 == str_eject.compare(var1)){
                         cmd.cmd = var1;
-                        cmd_q.push(cmd);
+                        //cmd_q.push(cmd);
+                        pCq->push(cmd);
 
                     }
                     else if (0 == var1.find(str_pickSensor)){ 
@@ -227,7 +229,8 @@ bool ExperimentHandler::handlePut(CivetServer *server, struct mg_connection *con
                         cmd.cmd = str_pickSensor;
                         cmd.para1 = row[0]-'A';
                         cmd.para2 = std::stoi(col);
-                        cmd_q.push(cmd);
+                        //cmd_q.push(cmd);
+                        pCq->push(cmd);
                         status = 200;
                     }
                     else if (0 == var1.find(str_shaker)){ 
@@ -254,7 +257,8 @@ bool ExperimentHandler::handlePut(CivetServer *server, struct mg_connection *con
                         cmd.para1 = shakerId;
                         cmd.para2 = shakerMode;
                         cmd.para3 = shakeRpm;
-                        cmd_q.push(cmd);
+                        //cmd_q.push(cmd);
+                        pCq->push(cmd);
                             
                         status = 200;
                     }

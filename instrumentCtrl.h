@@ -8,10 +8,11 @@
 class InstrumentCtrl
 {
 private:
-    threadsafe_queue<Command>* p_mq;
+    threadsafe_queue<Command>* pCq;
+    threadsafe_queue<ENGN_Info>* pRq;
     std::thread hw_thread;
 public:
-    InstrumentCtrl(threadsafe_queue<Command>* p);
+    InstrumentCtrl(threadsafe_queue<Command>* p, threadsafe_queue<ENGN_Info>* i);
     ~InstrumentCtrl();
     void control();
     void run();

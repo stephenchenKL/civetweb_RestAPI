@@ -2,13 +2,14 @@
 #include <iostream>
 #include "instrumentCtrl.h"
 
-extern threadsafe_queue<ENGN_Info> rslt_q;
+// extern threadsafe_queue<ENGN_Info> rslt_q;
 
 
 
-InstrumentCtrl::InstrumentCtrl(threadsafe_queue<Command>* p)
+InstrumentCtrl::InstrumentCtrl(threadsafe_queue<Command>* p, threadsafe_queue<ENGN_Info>* i)
 {
-    p_mq = p;
+    pCq = p;
+    pRq = i;
 }
 
 InstrumentCtrl::~InstrumentCtrl()
@@ -20,7 +21,7 @@ void  InstrumentCtrl::control()
     std::cout << "Ctrl thread is waiting for cmd ... \n";
     Command cmd;
     while(true){
-        p_mq->wait_and_pop(cmd);
+        pCq->wait_and_pop(cmd);
         if(0 == cmd.cmd.compare("info"))
         {
             ENGN_Info info;
@@ -29,7 +30,8 @@ void  InstrumentCtrl::control()
             info.bHasRef = true;
             info.bHasVariableSpeed = false;
             info.bMapOK = true;
-            rslt_q.push(info);
+            //rslt_q.push(info);
+            pRq->push(info);
         }
         std::cout << "cmd.cmd :" << cmd.cmd << std::endl;
         std::cout << "cmd.para1 :" << cmd.para1 << std::endl;

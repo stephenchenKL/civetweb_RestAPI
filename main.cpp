@@ -31,8 +31,8 @@
 #define METHOD_FILES_DIR "/tmp/"
 
 
-threadsafe_queue<Command> cmd_q;
-threadsafe_queue<ENGN_Info> rslt_q;
+// threadsafe_queue<Command> cmd_q;
+// threadsafe_queue<ENGN_Info> rslt_q;
 std::condition_variable cond_cmd;
 std::mutex mtx;
 
@@ -47,7 +47,12 @@ std::shared_future<ENGN_Info> info_future(info_promise.get_future());
 
  int main()
  {
-    InstrumentCtrl instrumentCtrl(&cmd_q);
+     
+    threadsafe_queue<Command> cmd_q;
+    threadsafe_queue<ENGN_Info> rslt_q;
+
+
+    InstrumentCtrl instrumentCtrl(&cmd_q, &rslt_q);
     instrumentCtrl.run();
     
     std::thread t_info(&InstrumentCtrl::getInfo, &instrumentCtrl, ref(info_promise) );
@@ -79,6 +84,9 @@ std::shared_future<ENGN_Info> info_future(info_promise.get_future());
 	CivetServer server(cpp_options); // <-- C++ style start
     
     ExperimentHandler h_experiment;
+    h_experiment.setCmd_q(&cmd_q);
+    h_experiment.setRslt_q(&rslt_q);
+
 	server.addHandler(EXPERIMENT_URI, h_experiment);
     
 
