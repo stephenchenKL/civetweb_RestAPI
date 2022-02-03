@@ -31,18 +31,6 @@
 #define METHOD_FILES_DIR "/tmp/"
 
 
-// threadsafe_queue<Command> cmd_q;
-// threadsafe_queue<ENGN_Info> rslt_q;
-std::condition_variable cond_cmd;
-std::mutex mtx;
-
-std::promise<ENGN_Info>info_promise;
-std::shared_future<ENGN_Info> info_future(info_promise.get_future());
-
-
-
-
-
 
 
  int main()
@@ -55,20 +43,11 @@ std::shared_future<ENGN_Info> info_future(info_promise.get_future());
     InstrumentCtrl instrumentCtrl(&cmd_q, &rslt_q);
     instrumentCtrl.run();
     
-    std::thread t_info(&InstrumentCtrl::getInfo, &instrumentCtrl, ref(info_promise) );
-    std::cout << info_future.get().bCanAutoGain << std::endl;
-    std::cout << info_future.get().bCanAutoGain << std::endl;
-    std::cout << info_future.get().bCanAutoGain << std::endl;
-    std::cout << info_future.get().bCanAutoGain << std::endl;
-    
-     
 
-     
-    int err = 0;
      
      // Show info
     std::cout << "Experiment Control: " << HOST_INFO << EXPERIMENT_URI << std::endl;
-    std::cout << "Method Files: " << HOST_INFO << METHOD_FILES_URI << std::endl;
+    //std::cout << "Method Files: " << HOST_INFO << METHOD_FILES_URI << std::endl;
     std::cout << "Exit Experiment Service: " << HOST_INFO << EXIT_URI << std::endl;
 
     mg_init_library(0);
@@ -86,13 +65,25 @@ std::shared_future<ENGN_Info> info_future(info_promise.get_future());
     ExperimentHandler h_experiment;
     h_experiment.setCmd_q(&cmd_q);
     h_experiment.setRslt_q(&rslt_q);
-
 	server.addHandler(EXPERIMENT_URI, h_experiment);
     
-
-     while (true) {
+    ExitHandler h_exit;
+    h_exit.setCmd_q(&cmd_q);
+    server.addHandler(EXIT_URI, h_exit);
+    
+    
+    while(true){
+        Command cmd;
+        cmd_q.wait_and_pop(cmd);
+        if(0 == cmd.cmd.compare("exit"))
+            std::cout << "Exit main thread ..." << std::endl;
+            break;
+    }
+    
+/*
+    while (true) {
  		sleep(1);
- 	}
+ 	}*/
 	
 
 	

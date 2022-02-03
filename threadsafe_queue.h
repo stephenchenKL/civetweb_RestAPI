@@ -27,6 +27,12 @@ public:
         data_queue.push(new_value);
         data_cond.notify_one();
     }
+    void push_all(T new_value)
+    {
+        std::lock_guard<std::mutex> lk(mut);
+        data_queue.push(new_value);
+        data_cond.notify_all();
+    }
     void wait_and_pop(T& value)
     {
         std::unique_lock<std::mutex> lk(mut);

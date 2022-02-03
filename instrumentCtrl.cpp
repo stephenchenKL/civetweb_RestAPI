@@ -33,6 +33,12 @@ void  InstrumentCtrl::control()
             //rslt_q.push(info);
             pRq->push(info);
         }
+        if(0 == cmd.cmd.compare("exit"))
+        {            
+            std::cout << "Exit Intrument Control thread ..." << std::endl;
+            pCq->push(cmd);
+            break;
+        }
         std::cout << "cmd.cmd :" << cmd.cmd << std::endl;
         std::cout << "cmd.para1 :" << cmd.para1 << std::endl;
         std::cout << "cmd.para2 :" << cmd.para2 << std::endl;
@@ -40,6 +46,7 @@ void  InstrumentCtrl::control()
         std::cout << "cmd.para4 :" << cmd.para4 << std::endl;
         std::cout << "cmd.para5 :" << cmd.para5 << std::endl;
         std::cout << "cmd.para6 :" << cmd.para6 << std::endl;
+        
         
     }
 }

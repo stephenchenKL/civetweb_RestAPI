@@ -13,10 +13,8 @@ using json = nlohmann::json;
 
 
 
-// extern threadsafe_queue<Command> cmd_q;
-// extern threadsafe_queue<ENGN_Info> rslt_q;
 
-
+std::string str_exit ("exit");
 std::string str_scan ("scan");
 std::string str_stop ("stop");
 std::string str_snap ("snap");
@@ -59,6 +57,22 @@ SendJSON(struct mg_connection *conn, cJSON *json_obj)
 
 
 
+bool ExitHandler::handleGet(CivetServer *server, struct mg_connection *conn)
+{
+    Command cmd;
+    cmd.cmd = str_exit;
+    pCq->push_all(cmd);
+    return true;
+}
+bool ExitHandler::handlePost(CivetServer *server, struct mg_connection *conn)
+{
+    return handleGet(server, conn);
+}
+bool ExitHandler::handlePut(CivetServer *server, struct mg_connection *conn)
+{
+    return handleGet(server, conn);
+}
+
 bool ExperimentHandler::handleGet(CivetServer *server, struct mg_connection *conn)
 {
 
@@ -88,6 +102,8 @@ bool ExperimentHandler::handleGet(CivetServer *server, struct mg_connection *con
             char *pp = strtok(pvs[i], delim2);
             if (pp != NULL) {
                 
+                // curl -i http://localhost:8089/api/exp?info -X GET
+
                 std::string str_info ("info");
                 std::string var1 = (std::string) pp;
                 std::cout << "var1 :" << var1 << std::endl;
@@ -101,7 +117,11 @@ bool ExperimentHandler::handleGet(CivetServer *server, struct mg_connection *con
                     ENGN_Info info;
                     //rslt_q.wait_and_pop(info);
                     pRq->wait_and_pop(info);
-                    std::cout << info.bCanAutoGain << info.bHasDark << info.bHasRef << info.bHasVariableSpeed << info.bMapOK << std::endl;
+                    std::cout << "info.bCanAutoGain=" << info.bCanAutoGain << std::endl
+                    << "info.bHasDark=" << info.bHasDark << std::endl
+                    << "info.bHasRef=" << info.bHasRef << std::endl
+                    << "info.bHasVariableSpeed=" << info.bHasVariableSpeed << std::endl
+                    << "info.bMapOK=" << info.bMapOK << std::endl;
                 }
             }
         }
